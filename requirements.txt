@@ -1,0 +1,15 @@
+Flask
+flask_cors
+pymongo
+pandas
+numpy
+scikit-learn
+seaborn
+gunicorn
+requests
+openaq
+schedule
+joblib
+python-dotenv
+# Only include APScheduler if you use it for scheduling jobs, otherwise it's not required
+# APScheduler
