@@ -1,25 +1,36 @@
-name: hourly-data-update
+name: hourly-updater
+
 on:
   schedule:
-    - cron: '0 * * * *'   # every hour at :00
-  workflow_dispatch: {}
+    - cron: '25 * * * *'   # runs at minute 25 every hour (UTC)
+  workflow_dispatch:       # allow manual run from Actions UI
 
 jobs:
-  update:
+  run-updater:
     runs-on: ubuntu-latest
+
     steps:
-      - uses: actions/checkout@v4
-      - name: Setup Python
+      - name: Checkout repo
+        uses: actions/checkout@v4
+
+      - name: Set up Python
         uses: actions/setup-python@v4
         with:
           python-version: '3.10'
+
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -r backend/requirements.txt
-      - name: Run updater
+          pip install -r requirements.txt
+        # if your backend code is in a subfolder (e.g. "backend/"), add:
+        # working-directory: backend
+
+      - name: Run updater script
         env:
           MONGODB_URI: ${{ secrets.MONGODB_URI }}
           OPENAQ_API_KEY: ${{ secrets.OPENAQ_API_KEY }}
+          SENSOR_IDS: ${{ secrets.SENSOR_IDS }}   # comma separated or JSON list
         run: |
-          python backend/update_and_push.py
+          # run the one-off script (adjust the filename if needed)
+          python update_and_push.py
+        # working-directory: backend   # uncomment if your script sits in subfolder
