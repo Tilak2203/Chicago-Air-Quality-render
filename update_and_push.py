@@ -158,10 +158,10 @@ if __name__ == "__main__":
     # update_horly_features(hourly_df)
     
     job()
-    schedule.every().hour.at(":25").do(job)
-    while True:
-        schedule.run_pending()
-        time.sleep(1)
+    # schedule.every().hour.at(":25").do(job)
+    # while True:
+    #     schedule.run_pending()
+    #     time.sleep(1)
     
     # print("Scheduled job running...")
     # latest_hourly_measurement(client_openaq)

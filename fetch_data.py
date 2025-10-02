@@ -123,11 +123,11 @@ def latest_hourly_measurement(client):
 
     
     if new_data.empty:
-        print("No new data to update")
+        # print("No new data to update")
         return
     
     collection.insert_many(new_data.to_dict("records"))
-    print(f"Inserted {len(new_data)} new rows.")
+    # print(f"Inserted {len(new_data)} new rows.")
     
     
 
