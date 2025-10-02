@@ -18,18 +18,17 @@
 
 # config.py
 import os
-from ast import literal_eval
+import json
 
-MONGODB_URI = os.environ.get("MONGODB_URI", "mongodb+srv://tilak:tilak@airquality.tcaneue.mongodb.net/?retryWrites=true&w=majority&appName=AirQuality")
-OPENAQ_API_KEY = os.environ.get("OPENAQ_API_KEY", "06319710ff4c0ef3acbd8058a8f529333d856419ab6819f22ccf04d002fe0430")
-# store SENSOR_IDS as comma-separated string in secrets; split to list here:
-SENSOR_IDS = os.environ.get("SENSOR_IDS", "")
-if SENSOR_IDS:
-    # either comma separated or a JSON list string; try both
-    try:
-        SENSOR_IDS = literal_eval(SENSOR_IDS) if (SENSOR_IDS.strip().startswith('[')) else [s.strip() for s in SENSOR_IDS.split(',')]
-    except Exception:
-        SENSOR_IDS = [s.strip() for s in SENSOR_IDS.split(',')]
-else:
-    SENSOR_IDS = []
+# MongoDB and API key
+MONGODB_URI = os.environ.get("MONGODB_URI")
+OPENAQ_API_KEY = os.environ.get("OPENAQ_API_KEY")
+
+# Default values
+DEFAULT_COORDINATES = json.loads(os.environ.get("DEFAULT_COORDINATES", "[41.893333, -87.634176]"))
+DEFAULT_RADIUS = int(os.environ.get("DEFAULT_RADIUS", "1000"))
+
+# Sensor IDs (stored as JSON in env variable)
+SENSOR_IDS = json.loads(os.environ.get("SENSOR_IDS", "{}"))
+
 
