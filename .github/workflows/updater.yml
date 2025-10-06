@@ -2,7 +2,7 @@ name: hourly-updater
 
 on:
   schedule:
-    - cron: '25 * * * *'   # runs at minute 25 every hour (UTC)
+    - cron: '15 * * * *'   # runs at minute 25 every hour (UTC)
   workflow_dispatch:       # allow manual run from Actions UI
 
 jobs:
