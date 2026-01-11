@@ -58,6 +58,37 @@ def get_last_readings(limit=5):
     collection = db['measurements']
     return list(collection.find().sort([("timestamp", -1)]).limit(limit))
 
+# def get_all_readings():
+#     """
+#     Get all readings from the database without limit
+#     Returns readings in chronological order (oldest first)
+#     """
+#     try:
+#         # Get all readings sorted by timestamp (ascending order)
+#         cursor = collection.find({}).sort('timestamp', 1)
+#         readings = []
+        
+#         for doc in cursor:
+#             # Round numeric fields to 2 decimal places
+#             for field in doc:
+#                 if isinstance(doc[field], (int, float)) and field != "_id":
+#                     doc[field] = round(doc[field], 2)
+            
+#             # Convert MongoDB specific types
+#             readings.append(json.loads(JSONEncoder().encode(doc)))
+        
+#         # Debug info
+#         if readings:
+#             oldest = min(r['timestamp'] for r in readings)
+#             newest = max(r['timestamp'] for r in readings)
+#             print(f"Retrieved {len(readings)} readings from {oldest} to {newest}")
+        
+#         return readings
+#     except Exception as e:
+#         print(f"Error retrieving data: {e}")
+#         return []
+
+
 def get_all_readings():
     """
     Get all readings from the database without limit
@@ -74,19 +105,29 @@ def get_all_readings():
                 if isinstance(doc[field], (int, float)) and field != "_id":
                     doc[field] = round(doc[field], 2)
             
-            # Convert MongoDB specific types
+            # Convert MongoDB specific types (ObjectId, datetime, etc.)
             readings.append(json.loads(JSONEncoder().encode(doc)))
         
-        # Debug info
+        # Safer debug info - avoid min/max comparison on mixed types
         if readings:
-            oldest = min(r['timestamp'] for r in readings)
-            newest = max(r['timestamp'] for r in readings)
-            print(f"Retrieved {len(readings)} readings from {oldest} to {newest}")
+            timestamps = [r['timestamp'] for r in readings if r.get('timestamp') is not None]
+            if timestamps:
+                try:
+                    oldest = min(timestamps)
+                    newest = max(timestamps)
+                    print(f"Retrieved {len(readings)} readings from {oldest} to {newest}")
+                except TypeError as te:
+                    print(f"Retrieved {len(readings)} readings (mixed timestamp types - cannot sort for debug)")
+                    print(f"Sample timestamps: {timestamps[:3]} ...")
+            else:
+                print(f"Retrieved {len(readings)} readings (no timestamps found)")
         
         return readings
+    
     except Exception as e:
         print(f"Error retrieving data: {e}")
         return []
+    
 
 
 def load_data_to_mongodb():
