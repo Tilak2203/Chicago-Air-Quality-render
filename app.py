@@ -12,6 +12,7 @@ from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from datetime import datetime
 import joblib
+import pandas as pd
 
 app = Flask(__name__)
 CORS(app)
@@ -39,16 +40,62 @@ def status():
         "status": "ok" if mongodb_connected else "error"
     })
     
-@app.route('/api/all-readings')
-def all_readings():
-    data = mongodb.get_all_readings()
-    return jsonify({
-        "readings": data,
-        "count": len(data),
-        "start_date": data[0]["timestamp"] if data else None,
-        "end_date": data[-1]["timestamp"] if data else None
-    })
+# @app.route('/api/all-readings')
+# def all_readings():
+#     data = mongodb.get_all_readings()
+#     return jsonify({
+#         "readings": data,
+#         "count": len(data),
+#         "start_date": data[0]["timestamp"] if data else None,
+#         "end_date": data[-1]["timestamp"] if data else None
+#     })
 
+@app.route("/api/all-readings", methods=["GET"])
+def api_all_readings():
+    try:
+        # Get raw readings (MongoDB or CSV)
+        readings = mongodb.get_all_readings()
+        print
+        if not readings:
+            return jsonify({"readings": []})
+
+        df = pd.DataFrame(readings)
+
+        # Ensure timestamp column exists
+        if "timestamp" not in df.columns:
+            return jsonify({"readings": []})
+
+        # Convert ANY timestamp input into datetime safely:
+        # - string timestamps
+        # - Unix ints (1704979200)
+        # - datetime objects
+        # - None values
+        def clean_ts(x):
+            try:
+                # If numeric (int/float), treat as UNIX timestamp
+                if isinstance(x, (int, float)):
+                    return pd.to_datetime(int(x), unit="s")
+                return pd.to_datetime(x, errors="coerce")
+            except:
+                return None
+
+        df["timestamp"] = df["timestamp"].apply(clean_ts)
+
+        # Drop bad timestamps
+        df = df.dropna(subset=["timestamp"])
+
+        # Sort safely now that everything is datetime
+        df = df.sort_values(by="timestamp")
+
+        # Convert to ISO for React compatibility
+        df["timestamp"] = df["timestamp"].dt.strftime("%Y-%m-%dT%H:%M:%S")
+
+        # Convert to JSON-safe format
+        return jsonify({"readings": df.to_dict(orient="records")})
+
+    except Exception as e:
+        print("Error retrieving data:", e)
+        return jsonify({"readings": [], "error": str(e)}), 500
 
 
 @app.route('/api/predict', methods=['POST'])
