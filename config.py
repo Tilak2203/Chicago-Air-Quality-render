@@ -1,8 +1,8 @@
 import os
 
-OPENAQ_API_KEY = os.getenv("OPENAQ_API_KEY", "06319710ff4c0ef3acbd8058a8f529333d856419ab6819f22ccf04d002fe0430")
+OPENAQ_API_KEY = os.getenv("OPENAQ_API_KEY", "Update this with your actual OPENAQ API")
 
-MONGODB_URI = os.getenv("MONGODB_URI", "mongodb+srv://tilak:tilak@airquality.tcaneue.mongodb.net/?retryWrites=true&w=majority&appName=AirQuality")
+MONGODB_URI = os.getenv("MONGODB_URI", "Update this with your actual db URI")
 
 DEFAULT_COORDINATES = [41.893333, -87.634176]
 
